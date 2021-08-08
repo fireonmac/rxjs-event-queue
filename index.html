@@ -11,9 +11,9 @@
 
     <script src="https://unpkg.com/alpinejs" defer></script>
 </head>
-<body class="min-h-screen pt-16">
+<body class="min-h-screen">
 
-    <h1 class="text-center font-bold text-3xl pt-16 pb-8">Event Queue</h1>
+    <h1 class="text-center font-bold text-3xl md:text-4xl pt-16 pb-8 md:pb-12">Event Queue</h1>
 
     <div x-data="app.eventVisualizer()" class="container mx-auto">
 
@@ -28,17 +28,12 @@
                 <div class="grid space-y-2">
                     <template x-for="item in pendingQueue.list">
                         
-                        <div x-data="app.eventItem(item)">
-
-
-                            <div 
-                                class="px-3 py-1 border-2 border-black w-full flex justify-between items-center"
-                            >
-                                <span x-text="`TIMER: ${item.timer} , ID: ${item.id}`"></span>
-                                <i class="fas fa-times cursor-pointer" @click="cancelPendingItem"></i>
-                            </div>
-
-        
+                        <!-- Pending Item -->
+                        <div 
+                            class="px-3 py-1 border-2 border-black w-full flex justify-between items-center"
+                        >
+                            <span x-text="`TIMER: ${item.timer} , ID: ${item.id}`"></span>
+                            <i class="fas fa-times cursor-pointer" @click="() => removeEventBeforeProceed(item.id)"></i>
                         </div>
 
                     </template>
@@ -50,20 +45,20 @@
                 <h2 class="font-bold pb-3 relative">
                     <div>
                         <span class="mr-1">Proceeding</span>
-                        <i class="fas fa-play cursor-pointer"></i>
-                        <i class="fas fa-pause cursor-pointer"></i>
+                        <!-- <i class="fas fa-play cursor-pointer"></i>
+                        <i class="fas fa-pause cursor-pointer"></i> -->
                     </div>
                     <div class="absolute top-0 right-0" x-text="proceedingQueue.list.length"></div>
                 </h2>
                 <div class="grid space-y-2">
                     <template x-for="item in proceedingQueue.list">
 
-                        <div x-data="app.eventItem(item)">
-                            <div class="px-3 py-1 border-2 border-black w-full flex justify-between items-center">
-                                <span x-text="`TIME: ${item.timer}, ID: ${item.id}`"></span>
-                                <i class="fas fa-times cursor-pointer"></i>
-                            </div>
+                        <!-- Proceeding Item -->
+                        <div class="px-3 py-1 border-2 border-black w-full flex justify-between items-center">
+                            <span x-text="`TIMER: ${item.timer} , ID: ${item.id}`"></span>
+                            <!-- <i class="fas fa-times cursor-pointer"></i> -->
                         </div>
+                    
 
                     </template>
                 </div>
@@ -79,10 +74,9 @@
                 <div class="grid space-y-2">
                     <template x-for="item in completedQueue.list">
 
-                        <div x-data="app.eventItem(item)">
-                            <div x-text="`TIMER: ${item.timer} , ID: ${item.id}`" class="px-3 py-1 border-2 border-black w-full"></div>
-                        </div>
-
+                        <!-- Completed Item -->
+                        <div x-text="`TIMER: ${item.timer} , ID: ${item.id}`" class="px-3 py-1 border-2 border-black w-full"></div>
+                    
                     </template>
                 </div>
 
@@ -91,7 +85,7 @@
         </div>
 
         <div class="pt-6 mx-auto flex justify-between space-x-2">
-            <button class="font-bold px-2 py-3 w-full py-2 bg-blue-400 hover:bg-blue-500 text-white"
+            <button class="font-bold px-2 py-3 w-full py-2 bg-green-400 hover:bg-green-500 text-white"
                 @click="addEvent">Add Event</button>
 
             <button class="font-bold px-2 py-3 w-full py-2 bg-red-400 hover:bg-red-500 text-white"

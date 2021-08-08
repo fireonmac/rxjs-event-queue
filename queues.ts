@@ -1,4 +1,4 @@
-import { concatMap, noop, Observable, Subject, Subscription } from "rxjs";
+import { concatMap, delay, filter, Observable, of, Subject, Subscription, tap } from "rxjs";
 import { EventItem } from "./interfaces";
 
 export class Queue<T> {
@@ -36,12 +36,37 @@ export class EventQueue extends Queue<Observable<any>> {
         this.init();
     }
 
+    init() {
+        this.subscription = this.list$.pipe(
+            concatMap(item => item),
+            tap((item) => {
+                this.proceedingQueue.dequeue();
+                this.completedQueue.enqueue(item);
+            })
+        ).subscribe();
+    }
+
     enqueue(eventItem$: Observable<EventItem>) {
         this.list$.next(eventItem$);
     }
 
-    dequeue() {
-        return null;
+    addEvent(eventItem: EventItem) {
+        this.pendingQueue.enqueue(eventItem);
+        
+        const eventItem$ = of(eventItem).pipe(
+            filter((item: EventItem) => this.pendingQueue.getFirst() && this.pendingQueue.getFirst().id == item.id),
+            tap(item => { 
+                this.pendingQueue.dequeue();
+                this.proceedingQueue.enqueue(item) 
+            }),
+            delay(eventItem.timer * 1000),
+        );
+
+        this.enqueue(eventItem$);
+    }
+
+    removeBeforeProceed(id: string) {
+        this.pendingQueue.list = this.pendingQueue.list.filter(item => item.id !== id);
     }
 
     clear() {
@@ -52,27 +77,10 @@ export class EventQueue extends Queue<Observable<any>> {
 
         this.init();
     }
-
-    init() {
-        this.subscription = this.list$.pipe(
-            concatMap(item => item),
-        ).subscribe({
-            next: (item) => {
-                const dequeuedItem = this.proceedingQueue.dequeue();
-                this.completedQueue.enqueue(item);
-                console.log(`${dequeuedItem.count} - Dequeued from ProceedingQueue:`, dequeuedItem);
-                console.log(`${item.count} - Enqueued to ComletedQueue: `, item);
-            },
-            error: err => console.log(err),
-            complete: () => { console.log('done') }
-        });
-    }
 }
 
 export class PendingQueue extends Queue<EventItem> {
-    removeItem(eventItem: EventItem) {
-        return this.list = this.list.filter(item => item.id !== eventItem.id);
-    }
+
 }
 
 export class ProceedingQueue extends Queue<EventItem> {
